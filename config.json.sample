@@ -1,0 +1,10 @@
+{
+	"jenkinsUrl": "https://jenkins.youdomain",
+	"agentName": "agentName",
+	"nodeSlaveHome": "D:\\jenkins\\JenkinsAgent",
+	"username": "username",
+	"password": "password",
+	"userToken": "userToken",
+	"numExecutors": "1",
+	"label": "windows, node.js"
+}

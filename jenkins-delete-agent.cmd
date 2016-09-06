@@ -1,0 +1,1 @@
+powershell.exe -executionpolicy RemoteSigned -File .\jenkins-delete-agent.ps1
