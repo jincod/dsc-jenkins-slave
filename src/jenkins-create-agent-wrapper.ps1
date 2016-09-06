@@ -10,7 +10,7 @@ if (@(Get-Module cChoco –ListAvailable).Length -eq 0) {
     Find-Module –Includes DSCResource –Name cChoco | Install-Module -Force
 }
 
-. .\jenkins-create-agent.ps1
+. .\src\jenkins-create-agent.ps1
 
 $config = cat .\config.json | ConvertFrom-Json
 

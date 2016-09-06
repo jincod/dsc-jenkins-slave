@@ -1,1 +1,1 @@
-powershell.exe -executionpolicy RemoteSigned -File .\jenkins-create-agent-wrapper.ps1
+powershell.exe -executionpolicy RemoteSigned -File .\src\jenkins-create-agent-wrapper.ps1

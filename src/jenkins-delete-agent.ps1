@@ -2,10 +2,12 @@
 
 $config = cat .\config.json | ConvertFrom-Json
 
-$nssm = "$PSScriptRoot\nssm.exe"
+$root = resolve-path "$PSScriptRoot\.."
+$nssm = "$root\nssm.exe"
+
 $params = @(
     '-jar',
-    "$PSScriptRoot\jenkins-cli.jar",
+    "$root\bin\jenkins-cli.jar",
     '-noKeyAuth',
     '-noCertificateCheck',
     '-s',

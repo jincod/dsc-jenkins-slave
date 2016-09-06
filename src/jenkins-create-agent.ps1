@@ -1,5 +1,6 @@
 ﻿$DscWorkingFolder = $PSScriptRoot
-$nssm = "$PSScriptRoot\nssm.exe"
+$root = resolve-path "$PSScriptRoot\.."
+$nssm = "$root\nssm.exe"
 
 Configuration JenkinsAgent {
     param (
@@ -33,6 +34,18 @@ Configuration JenkinsAgent {
 
     node "localhost" {
 
+        File BinFolder {
+            Type = 'Directory'
+            DestinationPath = "$root\bin"
+            Ensure = "Present"
+        }
+
+        File AgentFolder {
+            Type = 'Directory'
+            DestinationPath = "$root\agent"
+            Ensure = "Present"
+        }
+
         WindowsFeature NetFrameworkCore
         {
             Ensure = "Present"
@@ -62,9 +75,9 @@ Configuration JenkinsAgent {
             GetScript = {
                 return @{
                     Result = (
-                        (Test-Path -Path "$($using:DscWorkingFolder)\node-v4.5.0-x64.msi") -and
-                        (Test-Path -Path "$($using:DscWorkingFolder)\slave.jar") -and
-                        (Test-Path -Path "$($using:DscWorkingFolder)\jenkins-cli.jar")
+                        (Test-Path -Path "$($using:root)\bin\node-v4.5.0-x64.msi") -and
+                        (Test-Path -Path "$($using:root)\bin\slave.jar") -and
+                        (Test-Path -Path "$($using:root)\bin\jenkins-cli.jar")
                     );
                 }
             };
@@ -81,23 +94,30 @@ Configuration JenkinsAgent {
                 })
 
                 foreach ($f in $files) {
-                    $OutFile = "$($using:DscWorkingFolder)\$($f.name)";
+                    $OutFile = "$($using:root)\bin\$($f.name)";
                     Invoke-WebRequest -Uri $f.url -OutFile $OutFile;
                     Unblock-File -Path $OutFile;
                 }
             };
             TestScript = {
-                (Test-Path -Path "$($using:DscWorkingFolder)\node-v4.5.0-x64.msi") -and
-                (Test-Path -Path "$($using:DscWorkingFolder)\slave.jar") -and
-                (Test-Path -Path "$($using:DscWorkingFolder)\jenkins-cli.jar")
+                (Test-Path -Path "$($using:root)\bin\node-v4.5.0-x64.msi") -and
+                (Test-Path -Path "$($using:root)\bin\slave.jar") -and
+                (Test-Path -Path "$($using:root)\bin\jenkins-cli.jar")
             }
+        }
+
+        File CopySlaveJar {
+            SourcePath = "$root\bin\slave.jar"
+            DestinationPath = "$root\agent\slave.jar"
+            Ensure = "Present"
+            Type = "File"
         }
 
         Package installNodeJS
         {
             DependsOn = "[Script]DownloadFiles";
             Name = 'Node.js';
-            Path = "$DscWorkingFolder\node-v4.5.0-x64.msi";
+            Path = "$root\bin\node-v4.5.0-x64.msi";
             Ensure = 'Present';
             ProductId = '';
             Arguments = 'ALLUSERS=1';
@@ -113,7 +133,7 @@ Configuration JenkinsAgent {
             SetScript = {
                 $params = @(
                     '-jar',
-                    "$($using:DscWorkingFolder)\jenkins-cli.jar",
+                    "$($using:root)\bin\jenkins-cli.jar",
                     '-noKeyAuth',
                     '-noCertificateCheck',
                     '-s',
@@ -153,7 +173,7 @@ Configuration JenkinsAgent {
                     "JenkinsAgent-$using:agentName",
                     'java',
                     '-jar',
-                    "$($using:DscWorkingFolder)\slave.jar",
+                    "$($using:root)\agent\slave.jar",
                     ' -noCertificateCheck',
                     '-jnlpUrl',
                     "$using:jenkinsUrl/computer/$using:agentName/slave-agent.jnlp",
