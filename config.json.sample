@@ -6,5 +6,5 @@
 	"password": "password",
 	"userToken": "userToken",
 	"numExecutors": "1",
-	"label": "windows, node.js"
+	"label": "windows node.js"
 }
