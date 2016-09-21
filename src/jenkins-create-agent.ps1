@@ -58,15 +58,21 @@ Configuration JenkinsAgent {
             DependsOn = "[WindowsFeature]NetFrameworkCore"
         }
 
-        cChocoPackageInstaller installJdk8
-        {
-            Name = "jdk8"
-            DependsOn = "[cChocoInstaller]installChoco"
-        }
-
         cChocoPackageInstaller installGit
         {
             Name = "git.install"
+            DependsOn = "[cChocoInstaller]installChoco"
+        }
+        
+        cChocoPackageInstaller installNodeJS
+        {
+            Name = "nodejs.install"
+            DependsOn = "[cChocoInstaller]installChoco"
+        }
+
+        cChocoPackageInstaller installJdk8
+        {
+            Name = "jdk8"
             DependsOn = "[cChocoInstaller]installChoco"
         }
 
@@ -75,7 +81,6 @@ Configuration JenkinsAgent {
             GetScript = {
                 return @{
                     Result = (
-                        (Test-Path -Path "$($using:root)\bin\node-v4.5.0-x64.msi") -and
                         (Test-Path -Path "$($using:root)\bin\slave.jar") -and
                         (Test-Path -Path "$($using:root)\bin\jenkins-cli.jar")
                     );
@@ -88,9 +93,6 @@ Configuration JenkinsAgent {
                 }, @{
                     name = "jenkins-cli.jar";
                     url = "$using:jenkinsUrl/jnlpJars/jenkins-cli.jar"
-                }, @{
-                    name = "node-v4.5.0-x64.msi";
-                    url = "https://nodejs.org/dist/v4.5.0/node-v4.5.0-x64.msi"
                 })
 
                 foreach ($f in $files) {
@@ -100,7 +102,6 @@ Configuration JenkinsAgent {
                 }
             };
             TestScript = {
-                (Test-Path -Path "$($using:root)\bin\node-v4.5.0-x64.msi") -and
                 (Test-Path -Path "$($using:root)\bin\slave.jar") -and
                 (Test-Path -Path "$($using:root)\bin\jenkins-cli.jar")
             }
@@ -111,16 +112,6 @@ Configuration JenkinsAgent {
             DestinationPath = "$root\agent\slave.jar"
             Ensure = "Present"
             Type = "File"
-        }
-
-        Package installNodeJS
-        {
-            DependsOn = "[Script]DownloadFiles";
-            Name = 'Node.js';
-            Path = "$root\bin\node-v4.5.0-x64.msi";
-            Ensure = 'Present';
-            ProductId = '';
-            Arguments = 'ALLUSERS=1';
         }
 
         Script AddJenkinsAgent {
