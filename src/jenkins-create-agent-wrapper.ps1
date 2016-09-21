@@ -6,8 +6,8 @@ if ($PSversionTable.PSVersion.Major -lt 5) {
     Write-Error "PSVersion less than 5"
 }
 
-if (@(Get-Module cChoco –ListAvailable).Length -eq 0) {
-    Find-Module –Includes DSCResource –Name cChoco | Install-Module -Force
+if (!(Get-Module cChoco –ListAvailable)) {
+    Install-Module –Name cChoco
 }
 
 . .\src\jenkins-create-agent.ps1
