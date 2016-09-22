@@ -122,25 +122,13 @@ Configuration JenkinsAgent {
                 }
             };
             SetScript = {
-                $params = @(
-                    '-jar',
-                    "$($using:root)\bin\jenkins-cli.jar",
-                    '-noKeyAuth',
-                    '-noCertificateCheck',
-                    '-s',
-                    "$using:jenkinsUrl",
-                    'create-node',
-                    "$using:agentName",
-                    '--username',
-                    "$using:username",
-                    '--password',
-                    "$using:password"
-                )
                 (gc "$($using:DscWorkingFolder)\node.xml") -replace '{agentName}', "$using:agentName"`
                     -replace '{nodeSlaveHome}', "$using:nodeSlaveHome"`
                     -replace '{numExecutors}', "$using:numExecutors"`
                     -replace '{label}', "$using:label" |
-                    & java @params
+                    & java "-jar" "$($using:root)\bin\jenkins-cli.jar" "-noKeyAuth" "-noCertificateCheck" `
+                        "-s" "$using:jenkinsUrl" "create-node" "$using:agentName" `
+                        "--username" "$using:username" "--password" "$using:password"
             };
             TestScript = {
                 if (Get-Service "JenkinsAgent-$using:agentName" -ErrorAction SilentlyContinue)
@@ -159,19 +147,7 @@ Configuration JenkinsAgent {
                 }
             };
             SetScript = {
-                $params = @(
-                    'install',
-                    "JenkinsAgent-$using:agentName",
-                    'java',
-                    '-jar',
-                    "$($using:root)\agent\slave.jar",
-                    ' -noCertificateCheck',
-                    '-jnlpUrl',
-                    "$using:jenkinsUrl/computer/$using:agentName/slave-agent.jnlp",
-                    '-jnlpCredentials',
-                    "$($using:username):$($using:userToken)"
-                ) 
-                & $($using:nssm) @params 
+                & $($using:nssm) "install" "JenkinsAgent-$using:agentName" "java" "-jar" "$($using:root)\agent\slave.jar" " -noCertificateCheck" "-jnlpUrl" "$using:jenkinsUrl/computer/$using:agentName/slave-agent.jnlp" "-jnlpCredentials" "$($using:username):$($using:userToken)"
                 & $($using:nssm) set "JenkinsAgent-$using:agentName" AppDirectory $using:nodeSlaveHome
                 & $($using:nssm) start "JenkinsAgent-$using:agentName"
             };
