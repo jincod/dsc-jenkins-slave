@@ -70,14 +70,14 @@ Configuration JenkinsAgent {
             DependsOn = "[cChocoInstaller]installChoco"
         }
 
-        cChocoPackageInstaller installJdk8
+        cChocoPackageInstaller installJre8
         {
-            Name = "jdk8"
+            Name = "jre8"
             DependsOn = "[cChocoInstaller]installChoco"
         }
 
         Script DownloadFiles {
-            DependsOn = "[cChocoPackageInstaller]installJdk8";
+            DependsOn = "[cChocoPackageInstaller]installJre8";
             GetScript = {
                 return @{
                     Result = (
