@@ -46,6 +46,12 @@ Configuration JenkinsAgent {
             Ensure = "Present"
         }
 
+        File NodeSlaveHomeFolder {
+            Type = 'Directory'
+            DestinationPath = "$using:nodeSlaveHome"
+            Ensure = "Present"
+        }
+
         WindowsFeature NetFrameworkCore
         {
             Ensure = "Present"
