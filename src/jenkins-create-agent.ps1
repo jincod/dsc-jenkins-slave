@@ -46,10 +46,19 @@ Configuration JenkinsAgent {
             Ensure = "Present"
         }
 
-        File NodeSlaveHomeFolder {
-            Type = 'Directory'
-            DestinationPath = "$using:nodeSlaveHome"
-            Ensure = "Present"
+        Script NodeSlaveHomeFolder
+        {
+            GetScript = {
+                return @{
+                    Result = "NodeSlaveHomeFolder";
+                }
+            };
+            SetScript = {
+                New-Item "$using:nodeSlaveHome" -type directory
+            };
+            TestScript = {
+                 Test-Path -Path "$using:nodeSlaveHome"
+            };
         }
 
         WindowsFeature NetFrameworkCore
