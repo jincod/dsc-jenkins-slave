@@ -91,8 +91,28 @@ Configuration JenkinsAgent {
             DependsOn = "[cChocoInstaller]installChoco"
         }
 
+        Script EnvironmentJava
+        {
+            DependsOn = "[cChocoPackageInstaller]installJre8"
+            GetScript = {
+                return @{
+                    Result = "EnvironmentJava";
+                }
+            };
+            SetScript = {
+                $javaPath = gci ("${env:ProgramFiles}\Java", "${env:ProgramFiles(x86)}\Java")[!(Test-Path "${env:ProgramFiles}\Java")] java.exe -Recurse | select -f 1 | Split-Path | Convert-Path
+                $javaHome = $javaPath | Split-Path
+
+                [Environment]::SetEnvironmentVariable("JAVA_HOME", $javaHome, "Machine")
+                [Environment]::SetEnvironmentVariable("Path", $env:Path + $javaPath, "Machine")
+            };
+            TestScript = {
+                ((gci Env:JAVA_HOME) -ne "") -or ((Get-Command java -ErrorAction SilentlyContinue) -ne $null)
+            };
+        }
+
         Script DownloadFiles {
-            DependsOn = "[cChocoPackageInstaller]installJre8";
+            DependsOn = "[Script]EnvironmentJava";
             GetScript = {
                 return @{
                     Result = (
@@ -137,6 +157,8 @@ Configuration JenkinsAgent {
                 }
             };
             SetScript = {
+                $env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User") 
+
                 (gc "$($using:DscWorkingFolder)\node.xml") -replace '{agentName}', "$using:agentName"`
                     -replace '{nodeSlaveHome}', "$using:nodeSlaveHome"`
                     -replace '{numExecutors}', "$using:numExecutors"`
