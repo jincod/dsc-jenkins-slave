@@ -27,7 +27,8 @@ Configuration JenkinsAgent {
         [string]$numExecutors,
         [Parameter(Mandatory=$true)]
         [ValidateNotNullOrEmpty()]
-        [string]$label
+        [string]$label,
+        [PSCredential]$jenkinsAgentCredential
     )
 
     Import-DscResource –ModuleName PSDesiredStateConfiguration, cChoco
@@ -186,6 +187,9 @@ Configuration JenkinsAgent {
             SetScript = {
                 & $($using:nssm) "install" "JenkinsAgent-$using:agentName" "java" "-jar" "$($using:root)\agent\slave.jar" " -noCertificateCheck" "-jnlpUrl" "$using:jenkinsUrl/computer/$using:agentName/slave-agent.jnlp" "-jnlpCredentials" "$($using:username):$($using:userToken)"
                 & $($using:nssm) set "JenkinsAgent-$using:agentName" AppDirectory $using:nodeSlaveHome
+                if ($jenkinsAgentCredential -ne $null) {
+                    & $($using:nssm) set "JenkinsAgent-$using:agentName" ObjectName .\$($jenkinsAgentCredential.UserName) $($jenkinsAgentCredential.GetNetworkCredential().Password)
+                }                
                 & $($using:nssm) start "JenkinsAgent-$using:agentName"
             };
             TestScript = {
