@@ -105,10 +105,10 @@ Configuration JenkinsAgent {
                 $javaHome = $javaPath | Split-Path
 
                 [Environment]::SetEnvironmentVariable("JAVA_HOME", $javaHome, "Machine")
-                [Environment]::SetEnvironmentVariable("Path", $env:Path + $javaPath, "Machine")
+                [Environment]::SetEnvironmentVariable("Path", $env:Path + ";" +  $javaPath, "Machine")
             };
             TestScript = {
-                ((gci Env:JAVA_HOME) -ne "") -or ((Get-Command java -ErrorAction SilentlyContinue) -ne $null)
+                Test-Path env:JAVA_HOME
             };
         }
 

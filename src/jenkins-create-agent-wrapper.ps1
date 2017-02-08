@@ -22,7 +22,7 @@ JenkinsAgent `
     -password $config.password `
     -userToken $config.userToken `
     -numExecutors $config.numExecutors `
-    -label $config.label
+    -label $config.label `
     -jenkinsAgentCredential (Get-Credential -Message "Jenkins local user")
 
 # Run
